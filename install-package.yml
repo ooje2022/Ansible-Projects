@@ -1,0 +1,16 @@
+---
+- name: Package to install packages on agent servers 
+  hosts: all
+  #gather_facts: no
+  become: true
+  tasks:
+    - name: install httpd package
+      yum:
+        name: httpd
+        state: installed
+
+    - name: launch http service
+      service:
+        name: httpd 
+        state: started
+        

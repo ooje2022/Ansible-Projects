@@ -1,0 +1,17 @@
+---
+- name: install multiple packages using loops
+  hosts: all
+  become: true
+
+  tasks:
+    - name: install / uninstall packages
+      yum:
+        name: "{{ item.pkg}}"
+        state: "{{item.setup}}"
+      loop:
+        - {pkg: 'telnet', setup: 'installed'}
+        - {pkg: 'make', setup: 'latest'}
+          #- {pkg: 'wget', setup: 'removed'}
+          #- {pkg: 'tree', setup: 'absent'}
+        - {pkg: 'wget', setup: 'latest'}
+        - {pkg: 'tree', setup: 'present'}

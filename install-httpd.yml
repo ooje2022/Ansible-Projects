@@ -1,0 +1,41 @@
+---
+- name: Package to install packages on agent servers
+  hosts: all
+    # gather_facts: no
+  become: true
+
+
+  tasks:
+    - name: install httpd on Redhat
+      yum:
+        name: httpd
+        state: installed
+      when: ansible_os_family == "RedHat"
+      notify: start httpd service
+
+    - name: install httpd on ubuntu
+      apt:
+        name: apache2
+        state: latest
+      when: ansible_os_family == "Debian"
+
+    - name: copying index.html file to agent servers
+      copy:
+        src: /home/ansadmin/playbooks/index.html
+        dest: /var/www/html
+
+
+  handlers:
+    - name: start httpd service
+      service:
+        name: httpd
+        state: started
+      when: ansible_os_family == "RedHat"
+
+    - name: start apache service
+      service:
+        name: httpd
+        state: started
+      when: ansible_os_family == "Debian"
+
+

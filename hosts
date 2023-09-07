@@ -1,0 +1,9 @@
+[rhelservers]
+172.31.21.62 # rhel
+172.31.30.79 # centos
+172.31.27.6 # aws
+[ubuntuservers]
+172.31.31.195 # ubuntu
+172.100.100.100
+
+localhost 

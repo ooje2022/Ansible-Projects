@@ -1,0 +1,9 @@
+---
+- name: playbook to create new user
+  hosts: all
+  #gather_facts: no
+  become: true
+  tasks:
+    - name: creating user sofia
+      user: 
+        name: sofia

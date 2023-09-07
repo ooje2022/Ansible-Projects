@@ -1,0 +1,17 @@
+---
+- name: install single pakage
+  hosts: all
+    #gather_facts: no
+
+  tasks:
+    - name: install redhat package
+      yum:
+        name: git
+        state: present
+      when: ansible_os_family == "RedHat"
+
+    - name: install debian package
+      apt:
+        name: git
+        state: present
+      when: ansible_os_family == "Debian"
