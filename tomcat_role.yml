@@ -1,0 +1,8 @@
+---
+- name: download install apache tomcat on webservers
+  hosts: webservers
+  become: true
+  gather_facts: yes
+
+  roles:
+    - tomcat_setup

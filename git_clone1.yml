@@ -1,0 +1,13 @@
+---
+- name: Cloning your private repository
+  hosts: webservers
+  gather_facts: no
+  vars_files:
+    - gc1_vault.pas
+
+
+  tasks:
+  - name: initiate git clone
+    git:
+      repo: https://{{ git_token }}@github.com/ooje2022/vault.git
+      dest: /home/ansadmin/vault

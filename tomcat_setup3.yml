@@ -1,0 +1,78 @@
+---
+- name: download install apache tomcat on webservers only
+  hosts: webservers
+  become: true
+  gather_facts: yes
+  vars:
+    tomcat_url:  https://dlcdn.apache.org/tomcat/tomcat-9/v9.0.80/bin/apache-tomcat-9.0.80.tar.gz
+    tomcat_package: apache-tomcat-9.0.80
+  vars_files:
+    - tomcat_vars.df 
+
+  tasks:
+    - name: install javajdk on REDHAT
+      #yum: 
+      #name: java 
+      #tate: installed
+      yum:
+        name: "{{ packages }}"
+        state: present
+      vars:
+        packages:
+           - java-11-openjdk-devel
+      when: ansible_os_family == "RedHat"
+      
+    - name: install javajdk on DEBIAN / UBUNTU
+      apt:
+        name: "{{ packages }}"
+        state: present
+      vars:
+        packages:
+           - openjdk-11-jdk
+      when: ansible_os_family == "Debian"
+
+
+    - name: download apache tomcat package
+      get_url:
+        url: "{{ tomcat_url}}"
+        dest: /opt
+        mode: 0755
+
+    - name: extract file from tar/zip packages
+      unarchive:
+        src: /opt/{{ tomcat_package }}.tar.gz
+        dest: /opt
+        remote_src: yes
+
+
+    - name: grant permissions to user to read, write and execute tomcat folders, subfolders and files
+      file: 
+        path: /opt/{{ tomcat_package }}
+        mode: 0755
+        recurse: yes
+
+    - name: create link file to startup.sh - not working yet
+      file:
+        src: /opt/{{ tomcat_package }}/bin/{{item.tomcat_script}}
+        dest: /usr/local/bin/{{item.tomcat_cmd}}
+        state: link
+
+    - name: create link file to shutdown.sh - not working yet
+      file:
+        src: /opt/{{ tomcat_package }}/bin/{{item.tomcat_script}}
+        dest: /usr/local/bin/{{item.tomcat_cmd}}
+        state: link
+
+      loop:
+      - { tomcat_script: 'startup.sh', tomcat_cmd: 'tomcatup' }
+      - { tomcat_script: 'shutdown.up', tomcat_cmd: 'tomcatdown' }
+
+
+    - name: startup tomcat service
+      command: nohup ./startup.sh #nohup ensures the service remain live
+      args:
+        chdir: /opt/{{ tomcat_package }}/bin 
+
+
+
+

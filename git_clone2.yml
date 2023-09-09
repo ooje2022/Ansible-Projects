@@ -1,0 +1,18 @@
+---
+- name: Ansible Clone of Private Repository
+  hosts: all
+  vars:
+    GIT_REPO: 'git@github.com:ooje2022/vault.git'
+    GIT_BRANCH: main
+    USER: ansadmin
+    PROJECT_NAME: vault
+  gather_facts: yes
+
+  tasks:
+    - name: Clone a private repository into {{PROJECT_NAME}} folder.
+      git:
+        repo: "{{ GIT_REPO }}"
+        version: "{{ GIT_BRANCH }}"
+        dest: "/home/{{ USER }}/{{ PROJECT_NAME }}"
+        accept_hostkey: yes
+      become: no

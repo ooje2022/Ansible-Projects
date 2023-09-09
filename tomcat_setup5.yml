@@ -1,0 +1,68 @@
+---
+- name: download install apache tomcat on webservers only
+  hosts: webservers
+  become: true
+  gather_facts: yes
+  vars_files:
+    - tomcat_vars.var
+
+  tasks:
+    - name: install javajdk on REDHAT
+      yum:
+        name: "{{ packages }}"
+        state: present
+      vars:
+        packages:
+           - java-11-openjdk-devel
+      when: ansible_os_family == "RedHat"
+      #yum: 
+        # name: java-11-openjdk-devel 
+        #  state: installed
+      #when: ansible_os_family == "RedHat"
+
+    - name: install javajdk on DEBIAN / UBUNTU
+      apt:
+        name: "{{ packages }}"
+        state: present
+      vars:
+        packages:
+          - openjdk-11-jdk
+      when: ansible_os_family == "Debian"
+
+    - name: download apache tomcat package
+      get_url:
+        url: "{{ tomcat_url }}" 
+        dest: /opt
+        mode: 0755
+
+    - name: extract file from tar/zip packages
+      unarchive:
+        src: /opt/{{ tomcat_package }}.tar.gz #
+        dest: /opt
+        remote_src: yes
+
+
+    - name: grant permissions to user to read, write and execute tomcat folders, subfolders and files
+      file: 
+        path: /opt/{{ tomcat_package }}
+        mode: 0755
+        recurse: yes
+
+    - name: create link file to startup.sh
+      file:
+        src: /opt/{{ tomcat_package }}/bin/{{ item.tomcat_script }}
+        dest: /usr/local/bin/{{ item.tomcat_cmd }}
+        state: link
+      loop:
+        - { tomcat_script: startup.sh, tomcat_cmd: tomcatup }
+        - { tomcat_script: shutdown.sh, tomcat_cmd: tomcatdown }
+
+    - name: startup tomcat service
+      command: nohup ./startup.sh # tomcatup #nohup ensures the tomcat system remain live
+      args:
+        chdir: /opt/{{ tomcat_package }}/bin  #/usr/local/bin 
+
+
+
+
+

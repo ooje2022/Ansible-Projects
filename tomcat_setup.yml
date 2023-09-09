@@ -1,0 +1,62 @@
+---
+- name: download install apache tomcat on webservers only
+  hosts: webservers
+  become: true
+  gather_facts: yes
+
+  tasks:
+    - name: install javajdk on REDHAT
+        yum: 
+          name: java 
+          state: installed
+      when: ansible_os_family == "RedHat"
+
+    - name: install javajdk on DEBIAN / UBUNTU
+      apt:
+        name: "{{ packages }}"
+        state: present
+      vars:
+        packages:
+           - openjdk-11-jdk
+
+      when: ansible_os_family == "Debian"
+
+    - name: download apache tomcat package
+      get_url:
+        url: https://dlcdn.apache.org/tomcat/tomcat-9/v9.0.80/bin/apache-tomcat-9.0.80.tar.gz
+        dest: /opt
+        mode: 0755
+
+    - name: extract file from tar/zip packages
+      unarchive:
+        src: /opt/apache-tomcat-9.0.80.tar.gz
+        dest: /opt
+        remote_src: yes
+
+
+    - name: grant permissions to user to read, write and execute tomcat folders, subfolders and files
+      file: 
+        path: /opt/apache-tomcat-9.0.80
+        mode: 0755
+        recurse: yes
+
+    - name: create link file to startup.sh
+      file:
+        src: /opt/apache-tomcat-9.0.80/bin/startup.sh
+        dest: /usr/local/bin/tomcatup
+        state: link
+
+    - name: create link file to shutdown.sh
+      file:
+        src: /opt/apache-tomcat-9.0.80/bin/shutdown.sh
+        dest: /usr/local/bin/tomcatdown
+        state: link
+
+    - name: startup tomcat service
+      command: nohup tomcatup #nohup ensures the tomcat system remain live
+      args:
+        chdir: /usr/local/bin 
+
+
+
+
